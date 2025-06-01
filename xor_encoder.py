@@ -1,27 +1,14 @@
-import sys
-KEY = 'x'
-def xor(data, key):
+import base64
 
-    key = str(key)
+def xor_encrypt(data: bytes, key: bytes) -> bytes:
+    return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
 
-    l = len(key)
+with open("payload.py", "rb") as f:
+    payload = f.read()
 
-    output_str = ''
+b64_payload = base64.b64encode(payload)
+xor_key = b"your_key"
+encrypted = xor_encrypt(b64_payload, xor_key)
 
-    for i in range(len(data)):
-    current = data[i]
-    current_key = key[i % len(key)]
-    output_str += chr(ord(current) ^ ord(current_key))
-    return output_str
-
-def printCiphertext(ciphertext):
-    print('{ 0x' + ', 0x'.join(hex(ord(x))[2:] for x in ciphertext) + ' };')
-    try:
-        plaintext = open(sys.argv[1], 'rb').read()
-    except:
-        print('File argument needed! %s ' % sys.argv[0])
-
-    sys.exit()
-
-ciphertext = xor(plaintext, KEY)
-print('{ 0x' + ', 0x'.join(hex(ord(x))[2:] for x in ciphertext) + ' };')
+with open("payload.bin", "wb") as f:
+    f.write(encrypted)
